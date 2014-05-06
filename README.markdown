@@ -2,6 +2,8 @@
 
 This application is written by [John Ferguson Smart] (https://github.com/wakaleo), a Java consultant, based in Sydney, Australia, and author of a lot of articles and books.
 
+Some changes have been added in order to inform the integration test coverage to Sonar.
+
 ## Building the project
 
 The project is a simple multi-module Maven project. To build the whole project, just run `mvn install` from the root directory.
