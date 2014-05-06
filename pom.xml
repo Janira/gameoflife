@@ -18,7 +18,16 @@
         <thucydides.version>0.9.222</thucydides.version>
         <jelastic.context>gameoflife</jelastic.context>
         <jelastic.environment>wakaleo</jelastic.environment>
-    </properties>
+    
+    	<!-- Tells Sonar to run the unit tests -->
+		<sonar.dynamicAnalysis>true</sonar.dynamicAnalysis>
+		<!-- Tells Sonar to use JaCoCo as the code coverage tool -->
+		<sonar.java.coveragePlugin>jacoco</sonar.java.coveragePlugin>
+		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+		<java-version>1.7</java-version>
+		<org.springframework-version>3.2.3.RELEASE</org.springframework-version>
+		<slf4j.version>1.7.5</slf4j.version>
+	</properties>
 
     <scm>
         <connection>scm:git:git@github.com:${github.account}/game-of-life.git</connection>
@@ -35,45 +44,57 @@
                     <target>1.6</target>
                 </configuration>
             </plugin>
+            <!-- Configure surefire to exclude the integration test -->
             <plugin>
                 <artifactId>maven-surefire-plugin</artifactId>
-                <version>2.10</version>
+                <version>2.15</version>
                 <configuration>
-                    <skip>true</skip>
-                </configuration>
-                <executions>
-                    <execution>
-                        <id>unit-tests</id>
-                        <phase>test</phase>
-                        <goals>
-                            <goal>test</goal>
-                        </goals>
-                        <configuration>
-                            <skip>false</skip>
-                            <includes>
-                                <include>**/When*.java</include>
-                                <include>**/*Test.java</include>
-                            </includes>
-                            <excludes>
-                                <exclude>%regex[.*integration.*]</exclude>
-                            </excludes>
-                        </configuration>
-                    </execution>
-                    <execution>
-                        <id>integration-tests</id>
-                        <phase>integration-test</phase>
-                        <goals>
-                            <goal>test</goal>
-                        </goals>
-                        <configuration>
-                            <skip>false</skip>
-                            <includes>
-                                <include>%regex[.*integration.*]</include>
-                            </includes>
-                        </configuration>
-                    </execution>
-                </executions>
+					<includes>
+                        <include>**/When*.java</include>
+                        <include>**/*Test.java</include>
+                    </includes>
+                    <excludes>
+                        <exclude>%regex[.*integrationtest.*]</exclude>
+                    </excludes>
+					<argLine>-XX:MaxPermSize=512m -Xmx256m ${jacoco.argLine}</argLine>
+					<!-- Force alphabetical order to have a reproducible build -->
+					<runOrder>alphabetical</runOrder>
+				</configuration>
+                <dependencies>
+					<dependency>
+						<groupId>org.apache.maven.surefire</groupId>
+						<artifactId>surefire-junit47</artifactId>
+						<version>2.15</version>
+					</dependency>
+				</dependencies>
             </plugin>
+            <!-- Configure the Failsafe plugin in order to execute the integration 
+				test files -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-failsafe-plugin</artifactId>
+				<configuration>
+					<includes>
+						<include>%regex[.*integrationtest.*]</include>
+					</includes>
+					<argLine>-XX:MaxPermSize=512m -Xmx256m ${jacoco.it.argLine}</argLine>
+					<runOrder>alphabetical</runOrder>
+				</configuration>
+				<executions>
+					<execution>
+						<id>integration-test</id>
+						<goals>
+							<goal>integration-test</goal>
+						</goals>
+					</execution>
+					<execution>
+						<id>verify</id>
+						<goals>
+							<goal>verify</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
             <!-- CODE COVERAGE -->
             <plugin>
                 <groupId>org.jacoco</groupId>
@@ -81,19 +102,65 @@
                 <version>0.6.3.201306030806</version>
                 <executions>
                     <execution>
-                        <id>jacoco-initialize</id>
-                        <phase>process-resources</phase>
-                        <goals>
-                            <goal>prepare-agent</goal>
-                        </goals>
-                    </execution>
-                    <execution>
-                        <id>jacoco-site</id>
-                        <phase>post-integration-test</phase>
-                        <goals>
-                            <goal>report</goal>
-                        </goals>
-                    </execution>
+						<id>prepare-agent</id>
+						<goals>
+							<goal>prepare-agent</goal>
+						</goals>
+						<configuration>
+							<excludes>
+								<exclude>**/*ITest.java</exclude>
+								<exclude>**/When*.java</exclude>
+                        		<exclude>**/*Test.java</exclude>
+							</excludes>
+							<propertyName>jacoco.argLine</propertyName>
+						</configuration>
+					</execution>
+					<execution>
+						<id>report</id>
+						<phase>prepare-package</phase>
+						<goals>
+							<goal>report</goal>
+						</goals>
+						<configuration>
+							<excludes>
+								<exclude>**/*ITest.java</exclude>
+								<exclude>**/When*.java</exclude>
+                        		<exclude>**/*Test.java</exclude>
+							</excludes>
+						</configuration>
+					</execution>
+					<execution>
+						<id>prepare-agent-it</id>
+						<phase>pre-integration-test</phase>
+						<goals>
+							<goal>prepare-agent</goal>
+						</goals>
+						<configuration>
+							<destFile>${project.build.directory}/jacoco-integration.exec</destFile>
+							<excludes>
+								<exclude>**/*ITest.java</exclude>
+								<exclude>**/When*.java</exclude>
+                        		<exclude>**/*Test.java</exclude>
+							</excludes>
+							<propertyName>jacoco.it.argLine</propertyName>
+						</configuration>
+					</execution>
+					<execution>
+						<id>report-it</id>
+						<phase>post-integration-test</phase>
+						<goals>
+							<goal>report</goal>
+						</goals>
+						<configuration>
+							<dataFile>${project.build.directory}/jacoco-integration.exec</dataFile>
+							<outputDirectory>${project.reporting.outputDirectory}/jacoco-it</outputDirectory>
+							<excludes>
+								<exclude>**/*ITest.java</exclude>
+								<exclude>**/When*.java</exclude>
+                        		<exclude>**/*Test.java</exclude>
+							</excludes>
+						</configuration>
+					</execution>
                 </executions>
             </plugin>
 
@@ -158,12 +225,55 @@
                         </execution>
                     </executions>
                     <configuration>
-                        <storyType>html</storyType>                         l
+                        <storyType>html</storyType>                         
                         <storyReport>${basedir}/target/easyb/easyb-report.html
                         </storyReport>
                     </configuration>
                 </plugin>
-
+				<!--This plugin's configuration is used to store Eclipse m2e settings 
+					only. It has no influence on the Maven build itself. -->
+				<plugin>
+					<groupId>org.eclipse.m2e</groupId>
+					<artifactId>lifecycle-mapping</artifactId>
+					<version>1.0.0</version>
+					<configuration>
+						<lifecycleMappingMetadata>
+							<pluginExecutions>
+								<pluginExecution>
+									<pluginExecutionFilter>
+										<groupId>org.codehaus.mojo</groupId>
+										<artifactId>build-helper-maven-plugin</artifactId>
+										<versionRange>[1.0,)</versionRange>
+										<goals>
+											<goal>add-test-source</goal>
+											<goal>add-test-resource</goal>
+										</goals>
+									</pluginExecutionFilter>
+									<action>
+										<execute />
+									</action>
+								</pluginExecution>
+								<pluginExecution>
+									<pluginExecutionFilter>
+										<groupId>org.jacoco</groupId>
+										<artifactId>
+											jacoco-maven-plugin
+										</artifactId>
+										<versionRange>
+											[0.6.3.201306030806,)
+										</versionRange>
+										<goals>
+											<goal>prepare-agent</goal>
+										</goals>
+									</pluginExecutionFilter>
+									<action>
+										<execute />
+									</action>
+								</pluginExecution>
+							</pluginExecutions>
+						</lifecycleMappingMetadata>
+					</configuration>
+				</plugin>
             </plugins>
         </pluginManagement>
         <extensions>
