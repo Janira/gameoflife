@@ -23,4 +23,10 @@ public class HomePageControllerITest {
 		ModelAndView index = homePageController.index();
 		assertEquals(index.getViewName(), "home");
 	}
+	
+	@Test
+	public void testHome(){
+		ModelAndView index = homePageController.home();
+		assertEquals(index.getViewName(), "home");
+	}
 }
