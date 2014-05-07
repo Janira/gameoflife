@@ -1,4 +1,4 @@
-## Author  
+## Author
 
 This application is written by [John Ferguson Smart] (https://github.com/wakaleo), a Java consultant, based in Sydney, Australia, and author of a lot of articles and books.
 
