@@ -30,10 +30,22 @@
 	</properties>
 
     <scm>
-        <connection>scm:git:git@github.com:${github.account}/game-of-life.git</connection>
-        <developerConnection>scm:git:git@github.com:${github.account}/game-of-life.git</developerConnection>
-        <url>scm:git:git@github.com:${github.account}/game-of-life.git</url>
+        <connection>scm:git:https://jfcorugedo@bitbucket.org/jfcorugedo/gameoflife.git</connection>
+        <developerConnection>scm:git:https://jfcorugedo:jfco.99@bitbucket.org/jfcorugedo/gameoflife.git</developerConnection>
+        <url>scm:git:https://jfcorugedo@bitbucket.org/jfcorugedo/gameoflife.git</url>
     </scm>
+    
+    <distributionManagement>
+		<repository>
+			<id>nexus</id>
+			<url>http://localhost:8081/nexus/content/repositories/releases</url>
+		</repository>
+		<snapshotRepository>
+			<id>nexus</id>
+			<url>http://localhost:8081/nexus/content/repositories/snapshots/</url>
+		</snapshotRepository>
+	</distributionManagement>
+    
     <build>
         <plugins>
             <plugin>
