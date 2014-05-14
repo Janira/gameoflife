@@ -56,7 +56,7 @@ public class GameController {
         try {
             Thread.currentThread().sleep(thinkingTime);
         } catch (InterruptedException e) {
-            e.printStackTrace();
+            /*DO NOTHING*/
         }
     }
 
