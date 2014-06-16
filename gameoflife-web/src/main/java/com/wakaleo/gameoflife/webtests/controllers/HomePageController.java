@@ -14,6 +14,7 @@ public class HomePageController {
 	// FIXME: do something nicer for the home page
     @RequestMapping("/")
     public ModelAndView index() {
+    	System.out.println("Redirecting to home...");
         return new ModelAndView("home");
     }
 
